@@ -61,7 +61,8 @@ class Solution:
     
         
         # Do a swap to ensure N1 is shorter than N2
-        if N2>N1:
+        
+        if N2<N1:
             _tmp = nums1
             nums1 = nums2
             nums2 = _tmp
@@ -71,12 +72,16 @@ class Solution:
             N2 = _tmp
             
         
+        #Case 3a: One list has only 1 value
+        
+        
+        
+        #Case 3b:
         low = 0
         high = N1
         t = (N1+N2-1)//2
-        
         c = 0
-        while (high-low > 1) and  (c < 10):
+        while  (c < 10):
             c = c+1
             
             p1 = (low+high)//2
@@ -90,23 +95,31 @@ class Solution:
                 high = p1
             else:
                 low = p1
-                
-            print(low, high)
+            
+            if(high-low <= 1): break 
             
         # get the greater value from the two smaller indices
+
+
+
         p1 = low
         p2 = t-p1-1
-            
-        if nums1[p1] > nums2[p2]:
+
+
+        if low==0 and nums1[p1]>nums2[p2+1]:
+            p1 = p1-1
+            p2 = p2+1
+            M = nums2[p2]    
+        elif nums1[p1] > nums2[p2]:
             M= nums1[p1]
         else:
             M= nums2[p2]
         
         
         if (N1+N2)%2==0:
-            if (p1 == N1):
+            if (p1 == N1-1):
                 M = M + nums2[p2+1]
-            elif (p2 == N2):
+            elif (p2 == N2-1):
                 M = M + nums1[p1+1]
             elif nums1[p1+1] < nums2[p2+1]:
                 M = M + nums1[p1+1]
