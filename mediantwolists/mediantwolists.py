@@ -31,12 +31,10 @@ class Solution:
                 median += higher[m-1-N1]
             median = median / 2
         
-        return M
+        return median
     
     
     def findMedianSortedArrays(self, nums1, nums2):
-        
-        print(nums1, nums2)
         
         N1 = len(nums1)
         N2 = len(nums2)
@@ -48,14 +46,12 @@ class Solution:
             return self._findMedian(nums2)
         if (N2 == 0):
             return self._findMedian(nums1)
-            
         
-        #
         # Case 2: Numbers in Lists do not overlap
         #
-        if (nums1[-1] < nums2[0]):
+        if (nums1[-1] <= nums2[0]):
             return self._findDisjointMedian(nums1, nums2)
-        if (nums2[-1] < nums1[0]):
+        if (nums2[-1] <= nums1[0]):
             return self._findDisjointMedian(nums2, nums1)
         
         
@@ -63,31 +59,66 @@ class Solution:
         #Case 3: Lists have overlapping values
         #
     
-        low1 = 0
-        high1 = N1
-        low2 = 0
-        high2 = N2
-
-        M1 = self._findMedian(nums1)
-        M2 = self._findMedian(nums2)
-
-        if M1==M2:
-            return M1
-
-        if N1 <= N2:
-            m = (N1-1) // 2
-        else:
-            m = (N2-1) // 2
+        
+        # Do a swap to ensure N1 is shorter than N2
+        if N2>N1:
+            _tmp = nums1
+            nums1 = nums2
+            nums2 = _tmp
             
-        if M1 < M2:
-            low1 = low1 + m +1
-            high2= high2 - m-1
-
-        if M1 > M2:
-            low2  = low2 + m +1
-            high1 = high1 - m -1
-
-        return self.findMedianSortedArrays(nums1[low1:high1], nums2[low2:high2])            
+            _tmp = N1
+            N1 = N2
+            N2 = _tmp
+            
+        
+        low = 0
+        high = N1
+        t = (N1+N2-1)//2
+        
+        c = 0
+        while (high-low > 1) and  (c < 10):
+            c = c+1
+            
+            p1 = (low+high)//2
+            p2 = t-p1
+            
+            diff = nums1[p1] - nums2[p2]
+            if diff==0:
+                return nums1[p1]
+                
+            if diff > 0:
+                high = p1
+            else:
+                low = p1
+                
+            print(low, high)
+            
+        # get the greater value from the two smaller indices
+        p1 = low
+        p2 = t-p1-1
+            
+        if nums1[p1] > nums2[p2]:
+            M= nums1[p1]
+        else:
+            M= nums2[p2]
+        
+        
+        if (N1+N2)%2==0:
+            if (p1 == N1):
+                M = M + nums2[p2+1]
+            elif (p2 == N2):
+                M = M + nums1[p1+1]
+            elif nums1[p1+1] < nums2[p2+1]:
+                M = M + nums1[p1+1]
+            else:
+                M = M + nums2[p2+1] 
+            M = M/2
+        
+        
+        return M
+                    
+            
+        
         
         
         
