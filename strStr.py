@@ -11,4 +11,6 @@ class Solution:
         for i in range(len(haystack)-N+1):
             if haystack[i:i+N] == needle:
                 return i
+        
+        #If not found    
         return -1
