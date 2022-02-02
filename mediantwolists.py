@@ -54,14 +54,11 @@ class Solution:
         if (nums2[-1] <= nums1[0]):
             return self._findDisjointMedian(nums2, nums1)
         
-        
         #
-        #Case 3: Lists have overlapping values
+        # Case 3: The values in the arrays overlap.
         #
-    
         
         # Do a swap to ensure N1 is shorter than N2
-        
         if N2<N1:
             _tmp = nums1
             nums1 = nums2
@@ -70,22 +67,35 @@ class Solution:
             _tmp = N1
             N1 = N2
             N2 = _tmp
-            
+
+        # The median index value (or the first of two if N1+N2 is even)
+        target = (N1+N2-1)//2
+
+        #Case 3a: 'Near disjoint' This happens when the first value of the short
+        # array is greater than the target index considering only the longer array
+        # This can often be the case when one list is much smaller
+        if nums1[0] > nums2[target]:
+            M = nums2[target]
+            if (N1+N2) % 2 == 0:
+                if (target == N2-1):
+                    M = M + nums1[0]
+                elif nums1[0] < nums2[target+1]:
+                    M = M + nums1[0]
+                else:
+                    M = M + nums2[target+1] 
+                M = M/2
+            return M
         
-        #Case 3a: One list has only 1 value
-        
-        
-        
-        #Case 3b:
+        #
+        #Case 3b: Lists have fully overlapping values
+        # In this case we perform a binary search to find the balanced
+        # pair of indices with the smallest gap
         low = 0
         high = N1
-        t = (N1+N2-1)//2
-        c = 0
-        while  (c < 10):
-            c = c+1
+        while  high-low > 1:
             
             p1 = (low+high)//2
-            p2 = t-p1
+            p2 = target-p1
             
             diff = nums1[p1] - nums2[p2]
             if diff==0:
@@ -96,21 +106,12 @@ class Solution:
             else:
                 low = p1
             
-            if(high-low <= 1): break 
             
         # get the greater value from the two smaller indices
-
-
-
         p1 = low
-        p2 = t-p1-1
+        p2 = target-p1-1
 
-
-        if low==0 and nums1[p1]>nums2[p2+1]:
-            p1 = p1-1
-            p2 = p2+1
-            M = nums2[p2]    
-        elif nums1[p1] > nums2[p2]:
+        if nums1[p1] > nums2[p2]:
             M= nums1[p1]
         else:
             M= nums2[p2]
