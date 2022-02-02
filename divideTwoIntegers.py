@@ -1,4 +1,6 @@
-
+# Python, of course, already has this as //
+# A more fun implementation would be to use a genetic algorithm to guess
+# the bitstring of the quotient ;)
 
 class Solution:
     def divide(self, dividend: int, divisor: int) -> int:
@@ -18,7 +20,7 @@ class Solution:
         a = abs(dividend);
         b = abs(divisor);
         
-        r = a.bit_length() - b.bit_length()     #max power of two s.t. 2**r *b <= a
+        r = a.bit_length() - b.bit_length()     #max power of two s.t. (2^r)*b <= a
         b = b <<r
         
         # Loop over the power-of-two multiples of b that are smaller/equal to a
