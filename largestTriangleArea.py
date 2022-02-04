@@ -3,6 +3,7 @@
 # the naive O(n^3) solution is what was expected
 
 # Area of a Triangle: 1/2*(x1*y2 + x2*y3 + x3*y1 - y1*x2 - y2*x3 -y3*x1)
+import math
 import matplotlib.pyplot as plt
 import random
 from time import time
@@ -104,16 +105,19 @@ class Solution:
         
         outside =[p for B in Buffer for p in B]
 
+        # You'll be tempted to apply the above steps to each Buffer.
+        # The speed improvement is minimal, only about 2%
+        # Almost all of the work is done in that first pass, and it's just O(N)
+        # so there's not really anything clever to do about it since the points
+        # aren't presorted
+
+
         hull = []
         for j in range(N):
-            # This proposed improvement -- iteratively weeding out the points
-            # doesn't do much. Only about a 2% improvement
-            # Almost all of the work is done in the initial outside/inside determination
-            #if len(Buffer[j])>len(points)**0.5:
-            #    Buffer[j],dummy,dummy = self.convexHull(Buffer[j])
             
-            hull+= [extrema[j-1]]
-            x1,y1 = hull[-1]
+            # First pass through the buffer to remove points that are interior
+            # to the triangle made with the two extrema points and any point in buffer
+            x1,y1 = extrema[j-1]
             x3,y3 = extrema[j]
             for x2,y2 in Buffer[j]:
                 Buffer[j] = [[pX,pY]
@@ -122,15 +126,44 @@ class Solution:
                         (((x2-x1)*(pY-y1) < (y2-y1)*(pX-x1)) or
                          ((x3-x2)*(pY-y2) < (y3-y2)*(pX-x2)))
                     ]
-                
-            slopes = []
-            for pX,pY in Buffer[j]:
-                if pX==x1:
-                    slopes += [float('inf')]
-                else:
-                    slopes += [(pY-y1)/(pX-x1)]
             
-            hull += [p for s,p in sorted(zip(slopes, Buffer[j]), key=lambda pair: pair[0])]
+            # Order the remaining candidate points (what's left of Buffer)
+            angles = []
+            for pX,pY in Buffer[j]:
+                angles += [math.atan2((pY-y1),(pX-x1))]
+            
+            Buffer[j] = [p for a,p in sorted(zip(angles, Buffer[j]), key=lambda pair: pair[0])]
+            
+            #Second Pass over the sorted list
+                # But what's the criteria?
+                # Perhaps, the next node is the one with the smallest slope  from the current node.
+                # We can ignore all of the ones in the ordered list between the current node and the smallest-sloped identified node for future consideration.
+                # Essentially, just search ahead of the 'current node', add it to the hull, and then search all of the nodes ahead of that to add to the hull.
+            
+            hull+= [extrema[j-1]]
+            hull += [Buffer[j][0]]
+            i=0
+            while i < len(Buffer[j])-1:
+                x1,y1 = Buffer[j][i]
+                minAngle = float('inf')
+                nextNodeId = None
+                for k in range(i+1, len(Buffer[j])):
+                    pX, pY = Buffer[j][k]
+                    angle= math.atan2((pY-y1),(pX-x1))
+                    if angle < minAngle:
+                        minAngle = angle
+                        nextNodeId = k
+                        print(k)
+                hull += [Buffer[j][nextNodeId]]
+                i = nextNodeId
+        
+        
+                    
+            # Go through each point in order and remove any point that is interior
+            # to any given pair of points   
+            
+            
+            #hull += Buffer[j]
 
         
         return hull, extrema, outside
@@ -153,8 +186,8 @@ points = [[0,0],[0,1],[0,2],[1,0],[1,1],[2,0]]
 points = [[42, 1], [34, 49], [2, 5], [33, 30], [8, 37], [43, 9], [38, 37], [23, 8], [48, 30], [11, 25], [16, 20], [22, 44], [40, 42], [36, 16], [47, 46], [29, 34], [34, 6], [20, 9], [40, 38], [24, 10], [24, 12], [44, 30], [36, 2], [34, 27], [39, 28], [45, 23], [15, 28], [26, 30], [31, 22], [3, 5], [41, 20], [50, 42], [43, 47], [25, 19], [19, 48], [41, 47], [12, 11], [32, 44], [28, 40], [49, 2]]
 
 random.seed(0)
-x =  [random.triangular(0, 1, 0.5) for i in range(int(1e6))]
-y =  [random.gauss(0, 1) for i in range(int(1e6))]
+x =  [random.triangular(0, 1, 0.5) for i in range(int(1e5))]
+y =  [random.gauss(0, 1)  for i in range(int(1e5))]
 
 points = [[a,b] for a,b in zip(x,y)]
 #points = [[13,-50],[43,3],[-35,38],[-9,-14],[9,2],[43,-3],[-1,-32],[25,7],[28,4],[26,16]]
@@ -165,17 +198,21 @@ hull,extrema,outside = S.convexHull(points)
 toc = time()
 print(toc-tic)
 
-
 fig,ax= plt.subplots()
-ax.scatter(x,y)
+ax.scatter(x,y,s=4)
 
 outsidex, outsidey = zip(*outside)
-ax.scatter(outsidex,outsidey, color='green')
+ax.scatter(outsidex,outsidey,s=4, color='green')
 
 hull += [hull[0]]
 hullx, hully = zip(*hull)
 ax.plot(hullx,hully, color='orange')
 ax.scatter(hullx,hully, color='orange')
+
+extX, extY = zip(*extrema)
+ax.scatter(extX,extY, color='red')
+
+
 plt.show()
 
 #print(S.largestTriangleArea(points))
