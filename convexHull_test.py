@@ -72,8 +72,19 @@ def plotHull(points, outside, hull, extrema):
     ax.scatter(extX,extY, color='red')
 
     plt.show()
-
-
+    
 if __name__ == '__main__':
-    testHull()
+    random.seed(20)
+    
+    x =  [random.gauss(0,1) for k in range(10000)]
+    y =  [random.gauss(0,1) for k in range(10000)]
+    points = list(zip(x,y))
+    tic = time()
+    shape = convexHull(points, 0.3)
+    hull = shape.hull
+    print( time()-tic, len(shape.outsiders))
+    
+    plotHull(points, shape.outsiders, shape.hull, shape.extrema)
+    
+    #testHull()
     

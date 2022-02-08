@@ -113,6 +113,7 @@ class convexHull:
         hull = []
         for j in range(N):
             
+            # All extrema are part of the hull. Add it in order.
             hull += [extrema[j-1]]
             
             # Special cases
@@ -129,21 +130,22 @@ class convexHull:
             x3,y3 = extrema[j]
             candidatescopy = candidates[j]
             for x2,y2 in candidatescopy:
-                if [x2,y2] in candidates[j]:
-                    candidates[j] = [[pX,pY]
-                        for pX,pY in candidates[j]
-                        if (x2==pX and y2==pY) or 
-                            (((x2-x1)*(pY-y1) < (y2-y1)*(pX-x1)) or
-                             ((x3-x2)*(pY-y2) < (y3-y2)*(pX-x2)))
-                        ]
-            
-            
+                if [x2,y2] not in candidates[j]: continue
+                candidates[j] = [[pX,pY]
+                    for pX,pY in candidates[j]
+                    if (x2==pX and y2==pY) or (x3==pX and y3==pY) or 
+                        (((x2-x1)*(pY-y1) < (y2-y1)*(pX-x1)) or
+                         ((x3-x2)*(pY-y2) < (y3-y2)*(pX-x2)))
+                    ]
+                    
             # 3. Order the remaining candidates by rotational angle
             # By this point, there are typically very few points remaining
             angles = []
-            basis = math.atan2((y1-y3),(x1-x3))
+            x2,y1 = extrema[j-1]
+            x3,y3 = extrema[j]
+            basis = math.atan2((y3-y1),(x3-x1))
             for pX,pY in candidates[j]:
-                angles += [math.atan2((pY-y3),(pX-x3))-basis % 6.2831852]
+                angles += [(math.atan2((pY-y3),(pX-x3))-basis) % 6.2831852]
             
             candidates[j] = [p for a,p in sorted(zip(angles, candidates[j]), key=lambda pair: pair[0])]
             
@@ -156,6 +158,7 @@ class convexHull:
             # for the one with the shallowest angle, and add it to the hull. Repeat.
             currentNodeId=0
             minAngle = 0;
+            candidates[j] += [extrema[j]]
             while currentNodeId < len(candidates[j])-1:
                 x2,y2 = hull[-2]
                 x1,y1 = hull[-1]
