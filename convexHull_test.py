@@ -48,7 +48,6 @@ def testHull():
     
     ax2.plot(gaps,[sum(r) for r in removals])
     ax2.set_ylabel('Outside points')
-    
     ax2.set_xlabel('Min distance between extrema')
 
     plt.show()
